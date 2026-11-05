@@ -8,3 +8,4 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+- Transit assistant answers come only from the rule-based engine in src/lib/transit (server function), never invented by an AI, so routes/fares stay grounded in the dataset.
