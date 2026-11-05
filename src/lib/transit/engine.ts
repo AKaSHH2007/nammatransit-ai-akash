@@ -101,7 +101,7 @@ function continueGrievance(msg: string, ctx: Context): ChatReply {
   let value = msg.trim();
   if (g.step === "operator") {
     const k = Object.keys(OPERATORS).find((o) => norm(msg).includes(o));
-    value = k ? OPERATORS[k] : value;
+    value = k ? OPERATORS[k]! : value;
   }
   const data = { ...g.data, [g.step]: value };
   const idx = GRIEVANCE_STEPS.findIndex((s) => s.key === g.step);
@@ -130,7 +130,7 @@ export function respond(message: string, ctxIn: Context = {}): ChatReply {
   }
 
   if (has(t, /complain|complaint|grievance|report (a )?problem|report an issue|report another/)) {
-    const first = GRIEVANCE_STEPS[0];
+    const first = GRIEVANCE_STEPS[0]!;
     return { reply: `I'll help you prepare a complaint draft. ${first.ask}`, cards: [], suggestions: [...first.chips, "Cancel complaint"], context: { ...ctx, grievance: { step: "operator", data: {} } } };
   }
 
@@ -144,8 +144,8 @@ export function respond(message: string, ctxIn: Context = {}): ChatReply {
   let origin = ctx.origin, destination = ctx.destination;
   const fromM = t.match(/\b(?:from|starting from|start from|starting at|board at)\s+(.+?)(?:\s+(?:to|towards|till)\s+|$)/);
   const toM = t.match(/\b(?:to|towards|till|going to|reach)\s+(.+)$/);
-  const fromHit = fromM ? findStations(fromM[1])[0]?.name : undefined;
-  const toHit = toM ? findStations(toM[1])[0]?.name : undefined;
+  const fromHit = fromM ? findStations(fromM[1] ?? "")[0]?.name : undefined;
+  const toHit = toM ? findStations(toM[1] ?? "")[0]?.name : undefined;
   if (fromHit) origin = fromHit;
   if (toHit) destination = toHit;
   if (toHit && !fromHit && stations.length >= 2 && stations[0]!.name !== toHit) origin = stations[0]!.name;
