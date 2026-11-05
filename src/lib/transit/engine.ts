@@ -148,6 +148,7 @@ export function respond(message: string, ctxIn: Context = {}): ChatReply {
   const toHit = toM ? findStations(toM[1])[0]?.name : undefined;
   if (fromHit) origin = fromHit;
   if (toHit) destination = toHit;
+  if (toHit && !fromHit && stations.length >= 2 && stations[0].name !== toHit) origin = stations[0].name;
   if (!fromHit && !toHit && stations.length >= 2) { origin = stations[0].name; destination = stations[1].name; }
 
   const wantsFacility = has(t, /accessib|lift|elevator|wheelchair|ramp|facilit|disab/);
