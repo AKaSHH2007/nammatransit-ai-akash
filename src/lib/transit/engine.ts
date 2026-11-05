@@ -7,7 +7,7 @@ export type Leg = { line: string; lineId: LineId; from: string; to: string; dire
 export type Journey = { origin: string; destination: string; mode: string; legs: Leg[]; totalStops: number; interchange?: string };
 
 export type GrievanceDraft = {
-  operator?: string; location?: string; category?: string; description?: string; datetime?: string;
+  operator?: string | undefined; location?: string | undefined; category?: string | undefined; description?: string | undefined; datetime?: string | undefined;
 };
 
 export type Card =
@@ -15,13 +15,13 @@ export type Card =
   | { kind: "fare"; journey: Journey; fare: number }
   | { kind: "facility"; station: string }
   | { kind: "alerts"; alerts: Alert[] }
-  | { kind: "grievance"; draft: Required<GrievanceDraft>; link: string };
+  | { kind: "grievance"; draft: Record<keyof GrievanceDraft, string>; link: string };
 
 export type Context = {
-  origin?: string;
-  destination?: string;
-  lastStation?: string;
-  grievance?: { step: keyof GrievanceDraft; data: GrievanceDraft };
+  origin?: string | undefined;
+  destination?: string | undefined;
+  lastStation?: string | undefined;
+  grievance?: { step: keyof GrievanceDraft; data: GrievanceDraft } | undefined;
 };
 
 export type ChatReply = { reply: string; cards: Card[]; suggestions: string[]; context: Context };
@@ -109,7 +109,7 @@ function continueGrievance(msg: string, ctx: Context): ChatReply {
   if (next) {
     return { reply: next.ask, cards: [], suggestions: [...next.chips, "Cancel complaint"], context: { ...ctx, grievance: { step: next.key, data } } };
   }
-  const draft = data as Required<GrievanceDraft>;
+  const draft = data as Record<keyof GrievanceDraft, string>;
   return {
     reply: "Here is your complaint draft. You can edit it, copy it, and submit it yourself on the official portal. Nothing has been submitted.",
     cards: [{ kind: "grievance", draft, link: grievanceLink(draft.operator) }],
@@ -148,8 +148,8 @@ export function respond(message: string, ctxIn: Context = {}): ChatReply {
   const toHit = toM ? findStations(toM[1])[0]?.name : undefined;
   if (fromHit) origin = fromHit;
   if (toHit) destination = toHit;
-  if (toHit && !fromHit && stations.length >= 2 && stations[0].name !== toHit) origin = stations[0].name;
-  if (!fromHit && !toHit && stations.length >= 2) { origin = stations[0].name; destination = stations[1].name; }
+  if (toHit && !fromHit && stations.length >= 2 && stations[0]!.name !== toHit) origin = stations[0]!.name;
+  if (!fromHit && !toHit && stations.length >= 2) { origin = stations[0]!.name; destination = stations[1]!.name; }
 
   const wantsFacility = has(t, /accessib|lift|elevator|wheelchair|ramp|facilit|disab/);
   const wantsFare = has(t, /fare|cost|price|how much|ticket|charge/);
@@ -186,7 +186,7 @@ export function respond(message: string, ctxIn: Context = {}): ChatReply {
   }
 
   if (stations.length === 1) {
-    const s = stations[0].name;
+    const s = stations[0]!.name;
     return { reply: `What would you like to know about ${s}?`, cards: [], suggestions: [`From ${s} to Chennai Airport`, `Is ${s} accessible?`], context: { ...ctx, lastStation: s } };
   }
 
